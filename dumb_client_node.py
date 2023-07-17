@@ -1,6 +1,9 @@
 import netsquid as ns
 from netsquid.protocols import NodeProtocol
 
+# Dumb version used for test
+# Use it at your own risk
+
 class clientProtocol(NodeProtocol):
 
     delay_for_wait = 4000 # delay of 4 milliseconds, parameter that could be tuned
@@ -20,8 +23,6 @@ class clientProtocol(NodeProtocol):
         #self.loc_measRes=[]
         self.key=[]
         
-    def start(self):
-        start_protocol()
 
     def start_protocol(): # TODO modify this implementation, run function first to call
         #do stuff for initialize protocol
