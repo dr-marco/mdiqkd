@@ -3,7 +3,8 @@ from netsquid.protocols import NodeProtocol
 import mdi_utils
 
 class mdiProtocol(NodeProtocol):
-    max_delay_for_HOM_interference = 1
+    # delay parameter used to identify if there is HOM interference, i.e. if 2 photons arrive at the same time in the MDI node
+    max_delay_for_HOM_interference = 1 
 
     def __init__(self, node, status=0):
         super().__init__()

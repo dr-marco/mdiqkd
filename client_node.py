@@ -3,7 +3,10 @@ from netsquid.protocols import NodeProtocol
 
 class clientProtocol(NodeProtocol):
 
-    delay_for_wait = 4000 # delay of 4 milliseconds, parameter that could be tuned
+    # delay of 4 milliseconds, parameter that could be tuned    
+    delay_for_wait = 4000 
+    # flag to identify if the particular node client is the first to perform the protocol or not. Default set to false
+    initializer = false 
 
     def __init__(self, node, status=0):
         super().__init__()
@@ -25,7 +28,7 @@ class clientProtocol(NodeProtocol):
 
     def start_protocol(): # TODO modify this implementation, run function first to call
         #do stuff for initialize protocol
-        
+
         this.run(init=True)
         return null
 

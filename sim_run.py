@@ -62,4 +62,9 @@ nodeB.connect_to(mdi_node, QChannel_B_right, local_port_name="portQB_2", remote_
 # Measurement device independent protocol
 mdi_protocol = mdi.mdi_node(mdi_node)
 
+# start the mdi protocol
+mdi_protocol.start()
 
+
+# execute the protocol TODO uncomment the next line if you want to run the protocol
+#stats = ns.sum_run(500000000) # high magic number to define a large amount of time to execute the QKD protocol
