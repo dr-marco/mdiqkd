@@ -13,7 +13,7 @@ class clientProtocol(NodeProtocol):
         super().__init__()
         self.num_bits=num_bits
         self.node = node
-        self.status = status #TODO what the fuck is this status value?
+        self.status = status #TODO what the fuck is this status value? edit: it could from the old scheme in which the state machine had different status in different function
         self.portNameQ1=port_names[0] #left arm
         self.portNameQ2=port_names[1] #right arm
         self.portNameC1=port_names[2] #receive port from mdi

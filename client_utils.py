@@ -15,23 +15,23 @@ def measurement_result_eval(init, chosen_basis, chosen_bit, mdi_result):
     if chosen_basis == rectilinear:
         if result == "cvch" or result == "dvdh" or result == "cvdh" or result == "chdv":
             if init: 
-                return chosen_bit
+                return int(chosen_bit)
             else:
                 # bit flip necessary in order to get the same bit as the init client
-                return not chosen_bit 
+                return int(not chosen_bit)
         else:
             return None
             
         # Evaluation if client have choose the digonal base
     if chosen_basis == diagonal:
         if result == "cvch" or result == "dvdh":
-            return chosen_bit
+            return int(chosen_bit)
         else if result == "chdv" or result == "cvdh":
             if init: 
-                return chosen_bit
+                return int(chosen_bit)
             else:
                 # bit flip necessary in order to get the same bit as the init client
-                return not chosen_bit 
+                return int(not chosen_bit) 
         else:
             return None
 
