@@ -3,6 +3,7 @@ import cmath
 import random
 
 #Utils funcions for Measurement Device Independent QKD protocol. Based on NetSquid library
+# Utils functions used by MDI nodes
 
 def polarization_angle(qubit):
     # It takes in input a qubit object from netsquid library, work with the ket representation
