@@ -32,7 +32,7 @@ class mdiProtocol(NodeProtocol):
                     right_qubit, = right_port.rx_input().items
                     right_busy = True
             # check if is arrived on the right instead and then check if the left one almost arrives instantly
-            else if status.second_term.value:
+            elif status.second_term.value:
                 right_qubit, = right_port.rx_input().items
                 right_busy = True
                 yield self.await_timer(max_delay_for_HOM_interference) | (self.await_port_input(left_port))

@@ -26,7 +26,7 @@ def measurement_result_eval(init, chosen_basis, chosen_bit, mdi_result):
     if chosen_basis == diagonal:
         if result == "cvch" or result == "dvdh":
             return int(chosen_bit)
-        else if result == "chdv" or result == "cvdh":
+        elif result == "chdv" or result == "cvdh":
             if init: 
                 return int(chosen_bit)
             else:
