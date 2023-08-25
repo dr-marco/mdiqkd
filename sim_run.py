@@ -1,10 +1,15 @@
 import netsquid as ns
 from netsquid.nodes.node import Node
-import mdi_node as mdi
+from netsquid.components.cchannel import ClassicalChannel
+from netsquid.components.models import  FibreDelayModel
+from netsquid.components.qchannel import QuantumChannel
+import mdi_thick_node as mdi
 
 # Config flag
 fibreLen = 20 # length of the fiber channel
 quantumLen = 20 # length of the quantum channel. This is used for both Alice and Bob
+cSpeed=2*10**5 # speed of light of fiber channel
+error_models = {"CDelayModel": FibreDelayModel(c=cSpeed)}
 # Reset of the simulation
 ns.sim_reset()
 ns.set_random_state(seed=42)
@@ -15,13 +20,16 @@ nodeB = Node("Bob"  ,   port_names=["portQB_1","portQB_2","portCB_1","portCB_2",
 #nodeC = Node("Charlie", port_names=["portQC_1","portQC_2","portCC_1","portCC_2"])
 #nodeD = Node("Dave"  ,  port_names=["portQD_1","portQD_2","portCD_1","portCD_2"])
 
-mdi_node = Node("mdi", port_names=["portQ_1","portQ_2","portC_1"])
+mdi_node = Node("mdi", port_names=["portQ_1", "portC_1","portQ_2","portC_2"])
+print(mdi_node)
+print(nodeA)
+print(nodeB)
 
 #Classical connection between Alice and Bob
 CChannel_B_A = ClassicalChannel("CChannel_B->A",
                                 delay=0,
                                 length=fibreLen, 
-                                models={"CDelayModel": FibreDelayModel(c=cSpeed)}) #TODO define fibreLen
+                                models={"CDelayModel": FibreDelayModel(c=cSpeed)}) 
 CChannel_A_B = ClassicalChannel("CChannel_A->B",
                                 delay=0,
                                 length=fibreLen, 
@@ -55,12 +63,12 @@ QChannel_B_right = QuantumChannel(name='QChannel_B_right',
                                    )
 
 nodeA.connect_to(mdi_node, QChannel_A_left, local_port_name="portQA_1", remote_port_name="portQ_1")
-nodeA.connect_to(mdi_node, QChannel_A_right, local_port_name="portQA_2", remote_port_name="portQ_2")
-nodeB.connect_to(mdi_node, QChannel_B_left, local_port_name="portQB_1", remote_port_name="portQ_1")
-nodeB.connect_to(mdi_node, QChannel_B_right, local_port_name="portQB_2", remote_port_name="portQ_1")
+#nodeA.connect_to(mdi_node, QChannel_A_right, local_port_name="portQA_2", remote_port_name="portQ_2")
+#nodeB.connect_to(mdi_node, QChannel_B_left, local_port_name="portQB_1", remote_port_name="portQ_1")
+nodeB.connect_to(mdi_node, QChannel_B_right, local_port_name="portQB_2", remote_port_name="portQ_2")
 
 # Measurement device independent protocol
-mdi_protocol = mdi.mdi_node(mdi_node)
+mdi_protocol = mdi.mdiProtocol(mdi_node)
 
 # start the mdi protocol
 mdi_protocol.start()
