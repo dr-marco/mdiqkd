@@ -9,8 +9,8 @@ class mdiProtocol(NodeProtocol):
     # delay parameter used to identify if there is HOM interference, i.e. if 2 photons arrive at the same time in the MDI node
     max_delay_for_HOM_interference = 1 
 
-    def __init__(self, node, status=0):
-        super().__init__()
+    def __init__(self, node):
+        super().__init__(node)
         self.node = node
         self.portNameQ1="portQ_1" # quantum left arm for Alice
         self.portNameC1="portC_1" # classic public channel for Alice
