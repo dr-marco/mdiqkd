@@ -2,8 +2,7 @@ import netsquid as ns
 from netsquid.protocols import NodeProtocol
 import mdi_utils
 
-# MDI node for thick mdi architecture
-# TODO early implementation for only Alice and Bob! To modify in order to increase the number of clients
+# MDI node for thin mdi architecture. Not very usable for more than two clients
 
 class mdiProtocol(NodeProtocol):
     # delay parameter used to identify if there is HOM interference, i.e. if 2 photons arrive at the same time in the MDI node
@@ -12,17 +11,15 @@ class mdiProtocol(NodeProtocol):
     def __init__(self, node, status=0):
         super().__init__()
         self.node = node
-        self.portNameQ1="PortQ_1" # quantum left arm for Alice
-        self.portNameC1="PortC_1" # classic public channel for Alice
-        self.portNameQ2="PortQ_2" # quantum right arm for Bob
-        self.portNameC2="PortC_2" # classic public channel for Bob
+        self.portNameQ1=port_names[0] #quantum left arm
+        self.portNameQ2=port_names[1] #quantum right arm
+        self.portNameC1=port_names[2] #classic public channel
 
 
     def run():
         left_port = self.node.ports[self.portNameQ1]
         right_port = self.node.ports[self.portNameQ2]
-        output_port_a = self.node.ports[self.portNameC1]
-        output_port_b = self.node.ports[self.portNameC2]
+        output_port = self.node.ports[self.portNameC1]
         left_busy = False #Check the status of the left port, true if a qubit arrives
         right_busy = False #Check the status of the right port, true if a qubit arrives
         while True:
@@ -47,8 +44,7 @@ class mdiProtocol(NodeProtocol):
             # if both photons arrives almost in the same time, do the HOM interference and publish the MDI result publicly
             if left_busy and right_busy:
                 meas_result = di_measurement(left_qubit,right_qubit)
-                output_port_a.tx_output(meas_result)
-                output_port_b.tx_output(meas_result)
+                output_port.tx_output(meas_result)
             # reset the two status flag
             left_busy = False
             right_busy = False

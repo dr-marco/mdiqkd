@@ -3,7 +3,7 @@ from netsquid.nodes.node import Node
 from netsquid.components.cchannel import ClassicalChannel
 from netsquid.components.models import  FibreDelayModel
 from netsquid.components.qchannel import QuantumChannel
-import mdi_thick_node as mdi
+import mdi_node as mdi
 
 # Config flag
 fibreLen = 20 # length of the fiber channel
@@ -21,9 +21,6 @@ nodeB = Node("Bob"  ,   port_names=["portQB_1","portQB_2","portCB_1","portCB_2",
 #nodeD = Node("Dave"  ,  port_names=["portQD_1","portQD_2","portCD_1","portCD_2"])
 
 mdi_node = Node("mdi", port_names=["portQ_1", "portC_1","portQ_2","portC_2"])
-print(mdi_node)
-print(nodeA)
-print(nodeB)
 
 #Classical connection between Alice and Bob
 CChannel_B_A = ClassicalChannel("CChannel_B->A",

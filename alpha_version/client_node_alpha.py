@@ -2,7 +2,7 @@ import netsquid as ns
 from netsquid.protocols import NodeProtocol
 import client_utils
 
-# new version of the client node, should work with sim_run.py
+# old version of the client node, had to work initially with mdi_node.py
 
 class clientProtocol(NodeProtocol):
 
