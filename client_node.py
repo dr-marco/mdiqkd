@@ -11,16 +11,14 @@ class clientProtocol(NodeProtocol):
     # flag to identify if the particular node client is the first to perform the protocol or not. Default set to false
     initializer = false 
 
-    def __init__(self, node, port_names, status=0):
+    def __init__(self, node, port_names):
         super().__init__()
         self.num_bits=num_bits
         self.node = node
-        self.status = status #TODO what the fuck is this status value? edit: it could be from the old scheme in which the state machine had different status in different function
-        self.portNameQ1=port_names[0] #left arm
-        self.portNameQ2=port_names[1] #right arm
-        self.portNameC1=port_names[2] #receive port from mdi
-        self.portNameC2=port_names[3] #from
-        self.portNameC2=port_names[4] #to
+        self.portNameQ1="portCQ"    #classical quantum communication channel to mdi node
+        self.portNameC1="portC_mdi" #receive port from mdi
+        self.portNameC2="portC_out" #to another classical node
+        self.portNameC2="portC_in"  #from another classical node
         #self.HbasisList=Random_basis_gen(self.num_bits)  #TODO Random_basis_gen from function module to use
         #self.XbasisList=Random_basis_gen(self.num_bits)
         #self.loc_measRes=[]

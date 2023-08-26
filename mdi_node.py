@@ -12,13 +12,13 @@ class mdiProtocol(NodeProtocol):
     def __init__(self, node, status=0):
         super().__init__()
         self.node = node
-        self.portNameQ1="PortQ_1" # quantum left arm for Alice
-        self.portNameC1="PortC_1" # classic public channel for Alice
-        self.portNameQ2="PortQ_2" # quantum right arm for Bob
-        self.portNameC2="PortC_2" # classic public channel for Bob
+        self.portNameQ1="portQ_1" # quantum left arm for Alice
+        self.portNameC1="portC_1" # classic public channel for Alice
+        self.portNameQ2="portQ_2" # quantum right arm for Bob
+        self.portNameC2="portC_2" # classic public channel for Bob
 
 
-    def run():
+    def run(self):
         left_port = self.node.ports[self.portNameQ1]
         right_port = self.node.ports[self.portNameQ2]
         output_port_a = self.node.ports[self.portNameC1]
