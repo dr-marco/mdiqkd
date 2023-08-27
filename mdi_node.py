@@ -7,7 +7,7 @@ import mdi_utils
 
 class mdiProtocol(NodeProtocol):
     # delay parameter used to identify if there is HOM interference, i.e. if 2 photons arrive at the same time in the MDI node
-    max_delay_for_HOM_interference = 1 
+    max_delay_for_HOM_interference = 100 
 
     def __init__(self, node):
         super().__init__(node)
@@ -32,7 +32,8 @@ class mdiProtocol(NodeProtocol):
             if status.first_term.value:
                 left_qubit,  = left_port.rx_input().items
                 left_busy = True
-                yield (self.await_timer(max_delay_for_HOM_interference)) | (self.await_port_input(right_port))
+                print("[-] photon received by alice at instance " + str(ns.sim_time()))
+                inner_status = yield (self.await_timer(mdiProtocol.max_delay_for_HOM_interference)) | (self.await_port_input(right_port))
                 if status.second_term.value:
                     right_qubit, = right_port.rx_input().items
                     right_busy = True
@@ -40,13 +41,15 @@ class mdiProtocol(NodeProtocol):
             elif status.second_term.value:
                 right_qubit, = right_port.rx_input().items
                 right_busy = True
-                yield self.await_timer(max_delay_for_HOM_interference) | (self.await_port_input(left_port))
-                if status.first_term.value:
+                print("[-] photon received by bob at instance " + str(ns.sim_time()))
+                inner_status = yield  (self.await_port_input(left_port)) | (self.await_timer(mdiProtocol.max_delay_for_HOM_interference))
+                if inner_status.first_term.value:
                     left_qubit,  = left_port.rx_input().items
                     left_busy = True
             # if both photons arrives almost in the same time, do the HOM interference and publish the MDI result publicly
             if left_busy and right_busy:
-                meas_result = di_measurement(left_qubit,right_qubit)
+                print("[+] two photons interference in the mdi node at instance " + str(ns.sim_time()))
+                meas_result = mdi_utils.di_measurement(left_qubit,right_qubit)
                 output_port_a.tx_output(meas_result)
                 output_port_b.tx_output(meas_result)
             # reset the two status flag

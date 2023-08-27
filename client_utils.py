@@ -1,7 +1,9 @@
+import random
+
 #Utils funcions for Measurement Device Independent QKD protocol. Based on NetSquid library
 # Utils functions used by client nodes that want negotiate a key with MDI-QKD protocol
 
-def measurement_result_eval(init, chosen_basis, chosen_bit, mdi_result):
+def measurement_result_eval(init, chosen_basis, chosen_bit, result):
     # It takes in input a init flag (true if the client node is the initializer, false if not),
     # which basis and bit the client had chosen to prepare the qubit sent to the mdi node
     # and last the results of the measurements published by the mdi node.
@@ -12,7 +14,7 @@ def measurement_result_eval(init, chosen_basis, chosen_bit, mdi_result):
     # and in doi:10.3390/electronics7040049
 
         # Evaluation if client have choose the rectilinear base
-    if chosen_basis == rectilinear:
+    if chosen_basis == 0:
         if result == "cvch" or result == "dvdh" or result == "cvdh" or result == "chdv":
             if init: 
                 return int(chosen_bit)
@@ -23,7 +25,7 @@ def measurement_result_eval(init, chosen_basis, chosen_bit, mdi_result):
             return None
             
         # Evaluation if client have choose the digonal base
-    if chosen_basis == diagonal:
+    if chosen_basis == 1:
         if result == "cvch" or result == "dvdh":
             return int(chosen_bit)
         elif result == "chdv" or result == "cvdh":
