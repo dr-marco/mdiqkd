@@ -7,7 +7,7 @@ import mdi_utils
 
 class mdiProtocol(NodeProtocol):
     # delay parameter used to identify if there is HOM interference, i.e. if 2 photons arrive at the same time in the MDI node
-    max_delay_for_HOM_interference = 100 
+    max_delay_for_HOM_interference = 1 
 
     def __init__(self, node):
         super().__init__(node)
@@ -32,16 +32,16 @@ class mdiProtocol(NodeProtocol):
             if status.first_term.value:
                 left_qubit,  = left_port.rx_input().items
                 left_busy = True
-                print("[-] photon received by alice at instance " + str(ns.sim_time()))
+                print("[-] photon received from alice at instance " + str(ns.sim_time()))
                 inner_status = yield (self.await_timer(mdiProtocol.max_delay_for_HOM_interference)) | (self.await_port_input(right_port))
-                if status.second_term.value:
+                if inner_status.second_term.value:
                     right_qubit, = right_port.rx_input().items
                     right_busy = True
             # check if is arrived on the right instead and then check if the left one almost arrives instantly
             elif status.second_term.value:
                 right_qubit, = right_port.rx_input().items
                 right_busy = True
-                print("[-] photon received by bob at instance " + str(ns.sim_time()))
+                print("[-] photon received from bob at instance " + str(ns.sim_time()))
                 inner_status = yield  (self.await_port_input(left_port)) | (self.await_timer(mdiProtocol.max_delay_for_HOM_interference))
                 if inner_status.first_term.value:
                     left_qubit,  = left_port.rx_input().items

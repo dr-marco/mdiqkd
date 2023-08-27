@@ -8,8 +8,8 @@ import mdi_node as mdi
 import client_node as client
 
 # Config flag
-fibreLen = 200 # length of the fiber channel
-quantumLen = 200 # length of the quantum channel. This is used for both Alice and Bob
+fibreLen = 20 # length of the fiber channel
+quantumLen = 20 # length of the quantum channel. This is used for both Alice and Bob
 cSpeed=2*10**5 # speed of light of fiber channel
 error_models = {"DelayModel": FibreDelayModel(c=cSpeed)}
 # Reset of the simulation
@@ -71,8 +71,8 @@ bob_protocol = client.clientProtocol(nodeB)
 # start the mdi protocol
 mdi_protocol.start()
 # start the client protocols
-bob_protocol.start()
 alice_protocol.start()
+bob_protocol.start()
 
 
 # execute the protocol 
