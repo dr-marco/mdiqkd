@@ -7,7 +7,7 @@ import client_utils as cu
 class clientProtocol(NodeProtocol):
 
     # delay of 4 milliseconds, parameter that could be tuned    
-    delay_for_wait = 10000 
+    delay_for_wait = 250000 
     delay_for_first = 1000000
 
     def __init__(self, node, num_bits=64, init=False): # port_names, # parameter moved out
@@ -41,7 +41,7 @@ class clientProtocol(NodeProtocol):
         while True:
             if self.init:
                 #start the protocol sending the first message to the other node
-                yield self.await_timer(delay_for_wait**2) #TODO insert random time value
+                yield self.await_timer(12000000) #TODO insert random time value
                 time_start = ns.sim_time()
                 output_port.tx_output(time_start)
             else: 

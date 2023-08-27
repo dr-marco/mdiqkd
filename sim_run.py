@@ -11,7 +11,7 @@ import client_node as client
 fibreLen = 20 # length of the fiber channel
 quantumLen = 20 # length of the quantum channel. This is used for both Alice and Bob
 cSpeed=2*10**5 # speed of light of fiber channel
-error_models = {"DelayModel": FibreDelayModel(c=cSpeed)}
+error_models = {"delay_model": FibreDelayModel(delay_mean=5, delay_std=0.1)}
 # Reset of the simulation
 ns.sim_reset()
 ns.set_random_state(seed=42)
@@ -24,11 +24,9 @@ mdi_node = Node("mdi", port_names=["portQ_1", "portC_1","portQ_2","portC_2"])
 
 #Classical connection between Alice and Bob
 CChannel_B_A = ClassicalChannel("CChannel_B->A",
-                                delay=0,
                                 length=fibreLen, 
                                 models={"CDelayModel": FibreDelayModel(c=cSpeed)}) 
 CChannel_A_B = ClassicalChannel("CChannel_A->B",
-                                delay=0,
                                 length=fibreLen, 
                                 models={"CDelayModel": FibreDelayModel(c=cSpeed)})
 
@@ -37,11 +35,9 @@ nodeA.connect_to(nodeB, CChannel_A_B, local_port_name="portC_out", remote_port_n
 
 #Classical connection between mdi node and client nodes
 CChannel_mdi_A = ClassicalChannel("CChannel_mdi->A",
-                                delay=0,
                                 length=fibreLen, 
                                 models={"CDelayModel": FibreDelayModel(c=cSpeed)}) 
 CChannel_mdi_B = ClassicalChannel("CChannel_mdi->B",
-                                delay=0,
                                 length=fibreLen, 
                                 models={"CDelayModel": FibreDelayModel(c=cSpeed)})
 
@@ -66,8 +62,8 @@ nodeB.connect_to(mdi_node, CQChannel_B, local_port_name="portCQ", remote_port_na
 mdi_protocol = mdi.mdiProtocol(mdi_node)
 
 # Client nodes protocols
-alice_protocol = client.clientProtocol(nodeA, init=True)
-bob_protocol = client.clientProtocol(nodeB)
+alice_protocol = client.clientProtocol(nodeA)
+bob_protocol = client.clientProtocol(nodeB, init=True)
 # start the mdi protocol
 mdi_protocol.start()
 # start the client protocols
