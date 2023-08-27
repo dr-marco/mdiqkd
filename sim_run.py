@@ -4,6 +4,7 @@ from netsquid.components.cchannel import ClassicalChannel
 from netsquid.components.models import  FibreDelayModel
 from netsquid.components.cqchannel import CombinedChannel
 import mdi_node as mdi
+import client_node as client
 
 # Config flag
 fibreLen = 20 # length of the fiber channel

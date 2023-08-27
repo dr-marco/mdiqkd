@@ -36,3 +36,8 @@ def measurement_result_eval(init, chosen_basis, chosen_bit, mdi_result):
             return None
 
     return None
+
+
+def random_basis_gen(length):
+    # Return a list of ones and zeros randomly chosen. Method used for qubit preparation
+    return [random.randint(0,1) for i in range(length)]
