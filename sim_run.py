@@ -4,6 +4,7 @@ from netsquid.components.cchannel import ClassicalChannel
 from netsquid.components.models import  FibreDelayModel
 #from netsquid.components.cqchannel import CombinedChannel
 from netsquid.components.qchannel import QuantumChannel
+from netsquid.components.models.qerrormodels import FibreLossModel
 import mdi_node as mdi
 import client_node as client
 
@@ -11,10 +12,10 @@ import client_node as client
 fibreLen = 20 # length of the fiber channel
 quantumLen = 20 # length of the quantum channel. This is used for both Alice and Bob
 cSpeed=2*10**5 # speed of light of fiber channel
-error_models = {"delay_model": FibreDelayModel(delay_mean=5, delay_std=0.1)}
+error_models = {"delay_model": FibreDelayModel(c=cSpeed), 'quantum_loss_model':FibreLossModel(p_loss_init=0, p_loss_length=0.2)}
 # Reset of the simulation
 ns.sim_reset()
-ns.set_random_state(seed=42)
+ns.set_random_state(seed=56)
 
 # Declaration of the nodes
 nodeA = Node("Alice",   port_names=["portCQ","portC_mdi","portC_out","portC_in"])
