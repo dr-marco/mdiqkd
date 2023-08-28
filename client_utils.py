@@ -1,4 +1,5 @@
 import random
+import netsquid as ns
 
 #Utils funcions for Measurement Device Independent QKD protocol. Based on NetSquid library
 # Utils functions used by client nodes that want negotiate a key with MDI-QKD protocol
@@ -43,3 +44,17 @@ def measurement_result_eval(init, chosen_basis, chosen_bit, result):
 def random_basis_gen(length):
     # Return a list of ones and zeros randomly chosen. Method used for qubit preparation
     return [random.randint(0,1) for i in range(length)]
+
+def random_start_time(end=10000000):
+    # Return a random time instant from 0 to end time. Method used for the start of the protocol
+    return random.randint(0,end)
+
+def generate_quantum_photon(chosen_bit, chosen_basis):
+    # Return a photon with polarization of 0, 45, 90 or 135 degree based on bit and basis chosen
+    qubits = ns.qubits.create_qubits(1) #generate a qubit in state |0>
+    qubit = qubits[0]
+    if chosen_bit%2==1:
+        ns.qubits.operate(qubit, ns.X) #apply negation i.e. from 0 to 1 if applied
+    if chosen_basis%2==1:
+        ns.qubits.operate(qubit, ns.H) #apply Hadamard gate to switch basis
+    return qubit

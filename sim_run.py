@@ -2,8 +2,8 @@ import netsquid as ns
 from netsquid.nodes.node import Node
 from netsquid.components.cchannel import ClassicalChannel
 from netsquid.components.models import  FibreDelayModel
-#from netsquid.components.cqchannel import CombinedChannel
-from netsquid.components.qchannel import QuantumChannel
+from netsquid.components.cqchannel import CombinedChannel
+#from netsquid.components.qchannel import QuantumChannel
 from netsquid.components.models.qerrormodels import FibreLossModel
 import mdi_node as mdi
 import client_node as client
@@ -46,12 +46,12 @@ mdi_node.connect_to(nodeA, CChannel_mdi_A, local_port_name="portC_1", remote_por
 mdi_node.connect_to(nodeB, CChannel_mdi_B, local_port_name="portC_2", remote_port_name="portC_mdi")
 
 #Classical-Quantum connection from Alice and Bob to MDI node
-CQChannel_A = QuantumChannel(name='QChannel_A_left',    
+CQChannel_A = CombinedChannel(name='QChannel_A_left',
                                 length=quantumLen,
                                 models=error_models
                             )
 
-CQChannel_B = QuantumChannel(name='QChannel_B_right',
+CQChannel_B = CombinedChannel(name='QChannel_B_right',
                                 length=quantumLen,
                                 models=error_models
                             )
@@ -63,8 +63,8 @@ nodeB.connect_to(mdi_node, CQChannel_B, local_port_name="portCQ", remote_port_na
 mdi_protocol = mdi.mdiProtocol(mdi_node)
 
 # Client nodes protocols
-alice_protocol = client.clientProtocol(nodeA)
-bob_protocol = client.clientProtocol(nodeB, init=True)
+alice_protocol = client.clientProtocol(nodeA, num_bits=1000, init=True)
+bob_protocol = client.clientProtocol(nodeB, num_bits=1000)
 # start the mdi protocol
 mdi_protocol.start()
 # start the client protocols

@@ -9,7 +9,7 @@ Simulation of the protocol Measurement-Device-Independent Quantum Key Distributi
 Completed the first working simulation network, two nodes (alice and bob) and a central mdi node. It could be better but it is kinda usable
 
 Next steps: 
-- Change the Client-Mdi connection from Quantum to Combined channel
+- ~~Change the Client-Mdi connection from Quantum to Combined channel~~
 - Improve and tune delay and loss models
 - Modify the protocols in order to be more flexible and more _general purpouse_
 - Simulation network with more than two client

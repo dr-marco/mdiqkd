@@ -61,3 +61,11 @@ def di_measurement(qubit_a, qubit_b):
     theta_b = polarization_angle(qubit_b)
     probs = detection_probabilities(theta_a, theta_b)
     return random.choices(list(probs.keys()), weights=list(probs.values()), k=1)
+
+def extract_qubit(message):
+    # Extract the qubit from message received from CombinedChannel
+    quantum_message = message[1]
+    if len(quantum_message) > 0:
+        return quantum_message[0]
+    else:
+        return None
