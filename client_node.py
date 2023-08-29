@@ -6,6 +6,8 @@ import client_utils as c_utils
 
 class clientProtocol(NodeProtocol):
 
+    ver_ratio = 0.25
+
     def __init__(self, node, num_bits=64, init=False,
                     delay_for_wait = 250000, delay_for_first = 1000000, delta_delay = 500,
                     port_names=["portCQ","portC_mdi","portC_out","portC_in"]):
@@ -75,17 +77,33 @@ class clientProtocol(NodeProtocol):
             other_client_basis = input_port.rx_input().items
 
             # compare the basis and generate the correct key, if necessary do flip bit in bob's case
+            temp_key = []
             for i in range(self.num_bits):
                 if self.HbasisList[i] == other_client_basis[i]:
                     if self.loc_measRes[i] != None:
                         i_result = c_utils.measurement_result_eval(self.init, self.HbasisList[i], self.XbasisList[i], self.loc_measRes[i])
                         if i_result != None:
-                            self.key.append(i_result)
+                            temp_key.append(i_result)
 
+            # publish portion of the key and wait other part's key
+            if len(temp_key) >= (1/clientProtocol.ver_ratio):
+                # splitting the temp_key in:
+                #   verification_key used for the validation phase
+                verification_key = temp_key[:int(len(temp_key)*clientProtocol.ver_ratio)]
+                #   generated_key saved if the validation is successfull
+                generated_key = temp_key[int(len(temp_key)*clientProtocol.ver_ratio):]
+                output_port.tx_output(verification_key)
+                yield self.await_port_input(input_port)
+                other_client_ver_key = input_port.rx_input().items
+
+                if verification_key == other_client_ver_key:
+                    self.key = generated_key
+                    print(self.node.name + " generated key successfully: \t" + "".join([str(j) for j in self.key]))
+            else:
+                print(self.node.name + " generated key is too short for validation: :\t" + "".join([str(j) for j in temp_key]))
+
+            # flag reset
             self.init = False
             if self.late_init:
                 self.late_init = False
                 self.init = True
-            print(self.node.name + " generated key: \t" + "".join([str(j) for j in self.key]))
-
-            #TODO add key validation sending a portion of the key and compare if is equal to other node's generated key
