@@ -33,7 +33,7 @@ class mdiProtocol(NodeProtocol):
                 left_qubit_message,  = left_port.rx_input().items
                 left_qubit = mdi_utils.extract_qubit(left_qubit_message)
                 left_busy = True
-                print("[-] photon received from alice at instance " + str(ns.sim_time()))
+                print("[-] photon received from alice at time " + str(ns.sim_time()))
                 inner_status = yield (self.await_timer(mdiProtocol.max_delay_for_HOM_interference)) | (self.await_port_input(right_port))
                 if inner_status.second_term.value:
                     right_qubit_message, = right_port.rx_input().items
@@ -44,7 +44,7 @@ class mdiProtocol(NodeProtocol):
                 right_qubit_message, = right_port.rx_input().items
                 right_qubit = mdi_utils.extract_qubit(right_qubit_message)
                 right_busy = True
-                print("[-] photon received from bob at instance " + str(ns.sim_time()))
+                print("[-] photon received from bob at time " + str(ns.sim_time()))
                 inner_status = yield  (self.await_port_input(left_port)) | (self.await_timer(mdiProtocol.max_delay_for_HOM_interference))
                 if inner_status.first_term.value:
                     left_qubit_message,  = left_port.rx_input().items
@@ -52,7 +52,7 @@ class mdiProtocol(NodeProtocol):
                     left_busy = True
             # if both photons arrives almost in the same time, do the HOM interference and publish the MDI result publicly
             if left_busy and right_busy:
-                print("[+] two photons interference in the mdi node at instance " + str(ns.sim_time()))
+                print("[+] two photons interference in the mdi node at time " + str(ns.sim_time()))
                 if (left_qubit != None) and (right_qubit != None):
                     meas_result = mdi_utils.di_measurement(left_qubit,right_qubit)
                     output_port_a.tx_output(meas_result)

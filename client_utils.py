@@ -45,9 +45,9 @@ def random_basis_gen(length):
     # Return a list of ones and zeros randomly chosen. Method used for qubit preparation
     return [random.randint(0,1) for i in range(length)]
 
-def random_start_time(end=10000000):
-    # Return a random time instant from 0 to end time. Method used for the start of the protocol
-    return random.randint(0,end)
+def random_start_time(end=10000000, start=0):
+    # Return a random time instant from start to end+start time. Method used for the start of the protocol
+    return random.randint(start, start+end)
 
 def generate_quantum_photon(chosen_bit, chosen_basis):
     # Return a photon with polarization of 0, 45, 90 or 135 degree based on bit and basis chosen

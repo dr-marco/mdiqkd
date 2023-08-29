@@ -63,8 +63,8 @@ nodeB.connect_to(mdi_node, CQChannel_B, local_port_name="portCQ", remote_port_na
 mdi_protocol = mdi.mdiProtocol(mdi_node)
 
 # Client nodes protocols
-alice_protocol = client.clientProtocol(nodeA, num_bits=1000, init=True)
-bob_protocol = client.clientProtocol(nodeB, num_bits=1000)
+alice_protocol = client.clientProtocol(nodeA, num_bits=100, init=True)
+bob_protocol = client.clientProtocol(nodeB, num_bits=100, init=True)
 # start the mdi protocol
 mdi_protocol.start()
 # start the client protocols
