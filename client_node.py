@@ -6,7 +6,7 @@ import client_utils as c_utils
 
 class clientProtocol(NodeProtocol):
 
-    ver_ratio = 0.25
+    ver_ratio = 0.25 #ratio to split the key generated in the actual key and in the verification key for the validation phase
 
     def __init__(self, node, num_bits=64, init=False,
                     delay_for_wait = 250000, delay_for_first = 1000000, delta_delay = 500,
@@ -41,7 +41,8 @@ class clientProtocol(NodeProtocol):
         while True:
             if self.init:
                 #start the protocol sending the first message to the other node
-                start = yield ((self.await_timer(c_utils.random_start_time(start=ns.sim_time()))) | (self.await_port_input(input_port))) # edge case two init nodes. Yield should listen also the input port for others init messages even if the node is in init=True
+                expr = (self.await_timer(c_utils.random_start_time(start=ns.sim_time()))) | (self.await_port_input(input_port))
+                start = yield (expr) # edge case two init nodes. Yield should listen also the input port for others init messages even if the node is in init=True
                 time_start = ns.sim_time()
                 if start.second_term.value:
                     self.init = False
