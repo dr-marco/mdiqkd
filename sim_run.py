@@ -7,6 +7,7 @@ from netsquid.components.cqchannel import CombinedChannel
 from netsquid.components.models.qerrormodels import FibreLossModel
 import mdi_node as mdi
 import client_node as client
+from switch import ClassicSwitch
 
 # Config flag
 fibreLen = 20 # length of the fiber channel
@@ -20,19 +21,64 @@ ns.set_random_state(seed=56)
 # Declaration of the nodes
 nodeA = Node("Alice",   port_names=["portCQ","portC_mdi","portC_out","portC_in"])
 nodeB = Node("Bob"  ,   port_names=["portCQ","portC_mdi","portC_out","portC_in"])
+nodeC = Node("Charlie",   port_names=["portCQ","portC_mdi","portC_out","portC_in"])
 
 mdi_node = Node("mdi", port_names=["portQ_1", "portC_1","portQ_2","portC_2"])
+#switch_node = Node("switch_node", port_names=["Alice", "Alice_route", "Bob", "Bob_route"])
 
 #Classical connection between Alice and Bob
-CChannel_B_A = ClassicalChannel("CChannel_B->A",
-                                length=fibreLen, 
-                                models={"CDelayModel": FibreDelayModel(c=cSpeed)}) 
-CChannel_A_B = ClassicalChannel("CChannel_A->B",
-                                length=fibreLen, 
+# CChannel_B_A = ClassicalChannel("CChannel_B->A",
+#                                 length=fibreLen,
+#                                 models={"CDelayModel": FibreDelayModel(c=cSpeed)})
+# CChannel_A_B = ClassicalChannel("CChannel_A->B",
+#                                 length=fibreLen,
+#                                 models={"CDelayModel": FibreDelayModel(c=cSpeed)})
+
+# nodeB.connect_to(nodeA, CChannel_B_A, local_port_name="portC_out", remote_port_name="portC_in")
+# nodeA.connect_to(nodeB, CChannel_A_B, local_port_name="portC_out", remote_port_name="portC_in")
+
+# ------------------------------ NEW IMPLEMENTATION: switch ------------------------------
+switch_node = ClassicSwitch("switch_node", {"Alice":"Alice_route", "Bob":"Bob_route", "Charlie": "Charlie_route"})
+
+#Classical connection between switch node and client nodes
+CChannel_B_switch = ClassicalChannel("CChannel_B->switch",
+                                length=fibreLen,
+                                models={"CDelayModel": FibreDelayModel(c=cSpeed)})
+CChannel_switch_B = ClassicalChannel("CChannel_switch->B",
+                                length=fibreLen,
+                                models={"CDelayModel": FibreDelayModel(c=cSpeed)})
+CChannel_A_switch = ClassicalChannel("CChannel_A->switch",
+                                length=fibreLen,
+                                models={"CDelayModel": FibreDelayModel(c=cSpeed)})
+CChannel_switch_A = ClassicalChannel("CChannel_switch->A",
+                                length=fibreLen,
+                                models={"CDelayModel": FibreDelayModel(c=cSpeed)})
+CChannel_C_switch = ClassicalChannel("CChannel_C->switch",
+                                length=fibreLen,
+                                models={"CDelayModel": FibreDelayModel(c=cSpeed)})
+CChannel_switch_C = ClassicalChannel("CChannel_switch->C",
+                                length=fibreLen,
                                 models={"CDelayModel": FibreDelayModel(c=cSpeed)})
 
-nodeB.connect_to(nodeA, CChannel_B_A, local_port_name="portC_out", remote_port_name="portC_in")
-nodeA.connect_to(nodeB, CChannel_A_B, local_port_name="portC_out", remote_port_name="portC_in")
+nodeB.ports["portC_out"].connect(CChannel_B_switch.ports["send"])
+nodeB.ports["portC_in"].connect(CChannel_switch_B.ports["recv"])
+nodeA.ports["portC_out"].connect(CChannel_A_switch.ports["send"])
+nodeA.ports["portC_in"].connect(CChannel_switch_A.ports["recv"])
+nodeC.ports["portC_out"].connect(CChannel_C_switch.ports["send"])
+nodeC.ports["portC_in"].connect(CChannel_switch_C.ports["recv"])
+
+switch_node.ports["Bob"].connect(CChannel_B_switch.ports["recv"])
+switch_node.ports["Bob_route"].connect(CChannel_switch_B.ports["send"])
+switch_node.ports["Alice"].connect(CChannel_A_switch.ports["recv"])
+switch_node.ports["Alice_route"].connect(CChannel_switch_A.ports["send"])
+switch_node.ports["Charlie"].connect(CChannel_C_switch.ports["recv"])
+switch_node.ports["Charlie_route"].connect(CChannel_switch_C.ports["send"])
+
+# nodeB.connect_to(switch_node, CChannel_B_switch, local_port_name="portC_out", remote_port_name="Bob")
+# nodeB.connect_to(switch_node, CChannel_switch_B, local_port_name="portC_in", remote_port_name="Bob_route")
+# nodeA.connect_to(switch_node, CChannel_A_switch, local_port_name="portC_out", remote_port_name="Alice")
+# nodeA.connect_to(switch_node, CChannel_switch_A, local_port_name="portC_in", remote_port_name="Alice_route")
+
 
 #Classical connection between mdi node and client nodes
 CChannel_mdi_A = ClassicalChannel("CChannel_mdi->A",
@@ -63,13 +109,15 @@ nodeB.connect_to(mdi_node, CQChannel_B, local_port_name="portCQ", remote_port_na
 mdi_protocol = mdi.mdiProtocol(mdi_node)
 
 # Client nodes protocols
-alice_protocol = client.clientProtocol(nodeA, num_bits=1000, init=True)
-bob_protocol = client.clientProtocol(nodeB, num_bits=1000, init=True)
+alice_protocol = client.clientProtocol(nodeA, num_bits=1000, init=True, other_nodes=["Bob","Charlie"])
+bob_protocol = client.clientProtocol(nodeB, num_bits=1000, init=True, other_nodes=["Alice","Charlie"])
+#charlie_protocol = client.clientProtocol(nodeC, num_bits=1000, other_nodes=["Alice","Bob"])
 # start the mdi protocol
 mdi_protocol.start()
 # start the client protocols
 alice_protocol.start()
 bob_protocol.start()
+#charlie_protocol.start()
 
 
 # execute the protocol 

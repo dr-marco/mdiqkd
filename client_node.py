@@ -1,5 +1,6 @@
 import netsquid as ns
 from netsquid.protocols import NodeProtocol
+from netsquid.components.component import Message as msg
 import client_utils as c_utils
 
 # new version of the client node, should work with sim_run.py
@@ -10,7 +11,7 @@ class clientProtocol(NodeProtocol):
 
     def __init__(self, node, num_bits=64, init=False,
                     delay_for_wait = 250000, delay_for_first = 1000000, delta_delay = 500,
-                    port_names=["portCQ","portC_mdi","portC_out","portC_in"]):
+                    port_names=["portCQ","portC_mdi","portC_out","portC_in"], other_nodes=[]):
         super().__init__(node)
         self.num_bits=num_bits
         self.node = node
@@ -27,6 +28,7 @@ class clientProtocol(NodeProtocol):
         self.delay_for_first = delay_for_first
         self.delay_for_wait = delay_for_wait
         self.delta_delay = delta_delay
+        self.other_nodes = other_nodes
 
 
     def run(self):
@@ -49,7 +51,7 @@ class clientProtocol(NodeProtocol):
                     self.late_init = True
                     time_start, = input_port.rx_input().items
                 else:
-                    output_port.tx_output(time_start) #TODO init to mdi node
+                    output_port.tx_output(msg(time_start, sender=self.node.name, destination=self.other_nodes[0])) #TODO init to mdi node
             else: 
                 #wait for init
                 yield self.await_port_input(input_port)
@@ -73,7 +75,7 @@ class clientProtocol(NodeProtocol):
                     self.loc_measRes[i] = mdi_meas
 
             # publish basis chosen and wait other part's basis
-            output_port.tx_output(self.HbasisList)
+            output_port.tx_output(msg(self.HbasisList, sender=self.node.name, destination=self.other_nodes[0]))
             yield self.await_port_input(input_port)
             other_client_basis = input_port.rx_input().items
 
@@ -93,13 +95,16 @@ class clientProtocol(NodeProtocol):
                 verification_key = temp_key[:int(len(temp_key)*clientProtocol.ver_ratio)]
                 #   generated_key saved if the validation is successfull
                 generated_key = temp_key[int(len(temp_key)*clientProtocol.ver_ratio):]
-                output_port.tx_output(verification_key)
+                output_port.tx_output(msg(verification_key, sender=self.node.name, destination=self.other_nodes[0]))
                 yield self.await_port_input(input_port)
-                other_client_ver_key = input_port.rx_input().items
+                message = input_port.rx_input()
+                other_client_ver_key = message.items #.meta["sender"]
 
                 if verification_key == other_client_ver_key:
                     self.key = generated_key
                     print(self.node.name + " generated key successfully: \t" + "".join([str(j) for j in self.key]))
+                else:
+                    print("[!] MDI-QKD protocol failed. The two validation key arrays are not equal")
             else:
                 print(self.node.name + " generated key is too short for validation: :\t" + "".join([str(j) for j in temp_key]))
 

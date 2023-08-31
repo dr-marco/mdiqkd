@@ -1,8 +1,7 @@
-import netsquid as ns
 from netsquid.protocols import NodeProtocol
-import mdi_utils
 
-# switch node for star network architecture. Forwarding any message from sender to destination
+# personal implementation of a switch node for star network architecture. Forwarding any message from sender to destination
+# Not sure if this will be completed as ClassicSwitch works fine
 
 class switchProtocol(NodeProtocol):
     
