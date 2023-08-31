@@ -49,7 +49,7 @@ class clientProtocol(NodeProtocol):
                     self.late_init = True
                     time_start, = input_port.rx_input().items
                 else:
-                    output_port.tx_output(time_start)
+                    output_port.tx_output(time_start) #TODO init to mdi node
             else: 
                 #wait for init
                 yield self.await_port_input(input_port)
