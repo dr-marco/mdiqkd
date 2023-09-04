@@ -69,3 +69,11 @@ def extract_qubit(message):
         return quantum_message[0]
     else:
         return None
+
+def extract_message(message):
+    # Extract the classic part from message received from CombinedChannel
+    classic_message = message[0]
+    if len(classic_message) > 0:
+        return classic_message[0]
+    else:
+        return None

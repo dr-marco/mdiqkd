@@ -1,4 +1,4 @@
-from netsquid.components.switch import Switch, SimpleSwitch
+from netsquid.components.switch import Switch
 from netsquid.components.component import Component, Message
 
 # Switch implemented with netsquid design for star topology network
