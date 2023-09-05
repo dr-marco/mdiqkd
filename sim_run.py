@@ -26,21 +26,9 @@ nodeC = Node("Charlie", port_names=["portCQ","portC_mdi","portC_out","portC_in"]
 nodeD = Node("Dave",    port_names=["portCQ","portC_mdi","portC_out","portC_in"])
 
 mdi_node = Node("mdi", port_names=["portQ_1", "portC_1","portQ_2","portC_2", "portQ_3","portC_3", "portQ_3","portC_3"])
-#switch_node = Node("switch_node", port_names=["Alice", "Alice_route", "Bob", "Bob_route"])
-
-#Classical connection between Alice and Bob
-# CChannel_B_A = ClassicalChannel("CChannel_B->A",
-#                                 length=fibreLen,
-#                                 models={"CDelayModel": FibreDelayModel(c=cSpeed)})
-# CChannel_A_B = ClassicalChannel("CChannel_A->B",
-#                                 length=fibreLen,
-#                                 models={"CDelayModel": FibreDelayModel(c=cSpeed)})
-
-# nodeB.connect_to(nodeA, CChannel_B_A, local_port_name="portC_out", remote_port_name="portC_in")
-# nodeA.connect_to(nodeB, CChannel_A_B, local_port_name="portC_out", remote_port_name="portC_in")
 
 # ------------------------------ NEW IMPLEMENTATION: switch ------------------------------
-switch_node = ClassicSwitch("switch_node", {"Alice":"Alice_route", "Bob":"Bob_route", "Charlie": "Charlie_route", "Dave": "Dave_route"})
+switch_node = ClassicSwitch("switch_node", topology={"Alice":"Alice_route", "Bob":"Bob_route", "Charlie": "Charlie_route", "Dave": "Dave_route"})
 
 #Classical connection between switch node and client nodes
 CChannel_B_switch = ClassicalChannel("CChannel_B->switch",
@@ -136,10 +124,10 @@ mdi_protocol = mdi.mdiProtocol(mdi_node, client_nodes=["Alice", "Bob", "Charlie"
                                 quantum_port_names=["portQ_1", "portQ_2","portQ_3","portQ_4"], classic_port_names=["portC_1", "portC_2","portC_3","portC_4"])
 
 # Client nodes protocols
-alice_protocol = client.clientProtocol(nodeA, num_bits=num_bits_sim, init=True, other_nodes=["Bob", "Charlie", "Dave"])
-bob_protocol = client.clientProtocol(nodeB, num_bits=num_bits_sim, init=True, other_nodes=["Charlie"])
-charlie_protocol = client.clientProtocol(nodeC, num_bits=num_bits_sim, other_nodes=[])
-dave_protocol = client.clientProtocol(nodeD, num_bits=num_bits_sim, other_nodes=[])
+alice_protocol = client.clientProtocol(nodeA, num_bits=num_bits_sim, init=True, other_nodes=["Bob", "Dave"])
+bob_protocol = client.clientProtocol(nodeB, num_bits=num_bits_sim, init=False, other_nodes=[])
+charlie_protocol = client.clientProtocol(nodeC, num_bits=num_bits_sim, init=True, other_nodes=["Alice"])
+dave_protocol = client.clientProtocol(nodeD, num_bits=num_bits_sim, init=True, other_nodes=["Bob"])
 # start the mdi protocol
 mdi_protocol.start()
 # start the client protocols
@@ -150,7 +138,7 @@ dave_protocol.start()
 
 
 # execute the protocol 
-stats = ns.sim_run()#50000000000) # high magic number to define a large amount of time to execute the QKD protocol, maybe not necessary
+stats = ns.sim_run()
 
 print("End of simulation")
 print("Nodes generated keys")

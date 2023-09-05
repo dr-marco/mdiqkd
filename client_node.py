@@ -109,7 +109,7 @@ class clientProtocol(NodeProtocol):
                 # publish basis chosen and wait other part's basis
                 output_port.tx_output(msg(self.HbasisList, sender=self.node.name, destination=performing_with))
                 yield self.await_port_input(input_port)
-                other_client_basis = input_port.rx_input().items
+                other_client_basis = input_port.rx_input().items # TODO manage other init message at this time
                 # # !!! Very bad snippet of code TODO delete this garbage
                 # while not (other_client_basis_message.meta["sender"] == performing_with):
                 #     other_client_basis_message = input_port.rx_input()
