@@ -1,0 +1,33 @@
+{
+    "client_nodes":
+    [
+        {
+            "Alice":
+            {
+                "init": true,
+                "other_nodes": ["Bob", "Charlie", "Dave"]
+            }
+        },
+        {
+            "Bob":
+            {
+                "init": true,
+                "other_nodes": ["Charlie"]
+            }
+        },
+        {
+            "Charlie":
+            {
+                "init": false,
+                "other_nodes": []
+            }
+        },
+        {
+            "Dave":
+            {
+                "init": true,
+                "other_nodes": ["Bob", "Charlie"]
+            }
+        }
+    ]
+}

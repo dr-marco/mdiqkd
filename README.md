@@ -31,16 +31,16 @@ Quite big update. Modified the mdi and clients protocols in order to be able to 
 Next steps:
 - Refactor
 - Improve and tune delay and loss models
-- Create a _generate network and simulate_ file instead of current ```sim_run.py```
+- ~~Create a _generate network and simulate_ file instead of current ```sim_run.py```~~
 - Add parameter to post analyze the simulation for time and performance (for personal purposes)
 
 The simulation should work quite fine but it is not obvious that everything works perfectly. There may be some ~~bullshits~~ emm, flaws and bugs in the design. Hope to fix them soon. So, once again, be careful with this code
 
-The current network consists of four client nodes: Alice, Bob, Charlie and Dave
+The current network consists of four client nodes: Alice, Bob, Charlie and Dave. It is described in the json file ```client_nodes_db.json```
 
 ### Usage
 
-You can work with the sim_run.py file where you can modify some parameter if desired. You can run it simply with
+You can work with the __json__ file, where you can modify the network, and the ``sim_run.py`` file, where you can modify some parameter if desired. You can run it simply with
 
 ```python sim_run.py```
 
