@@ -11,9 +11,10 @@ import net_utils as nu
 import json
 
 # Config flag
-fibreLen = 20 # length of the fiber channel
-quantumLen = 20 # length of the quantum channel. This is used for both Alice and Bob
+fibreLen = 40 # length of the fiber channel
+quantumLen = 40 # length of the quantum channel. This is used for both Alice and Bob
 num_bits_sim = 1000 # number of qubits prepared during a qkd protocol execution
+delay_wait = 800000
 cSpeed=2*10**5 # speed of light of fiber channel
 error_models = {"delay_model": FibreDelayModel(c=cSpeed), 'quantum_loss_model':FibreLossModel(p_loss_init=0, p_loss_length=0.2)}
 
@@ -78,7 +79,7 @@ for client in client_nodes:
 
     node_.connect_to(mdi_node, CQChannel_node, local_port_name="portCQ", remote_port_name=mdi_ports[client][1])
     node_objects.append(node_)
-    node_protocol = client_node.clientProtocol(node_, num_bits=num_bits_sim, init=init[client], other_nodes=other_nodes[client])
+    node_protocol = client_node.clientProtocol(node_, num_bits=num_bits_sim, delay_for_wait = delay_wait, init=init[client], other_nodes=other_nodes[client])
     node_protocol.start()
     node_protocol_objects.append(node_protocol)
 
@@ -87,12 +88,22 @@ mdi_protocol = mdi.mdiProtocol(mdi_node, client_nodes=client_nodes,
                                 quantum_port_names=nu.get_quantum_ports(mdi_ports), classic_port_names=nu.get_classic_ports(mdi_ports))
 
 mdi_protocol.start()
+cumulative_stat = {}
+for i in range(10):
+    # execute the simulation 
+    stats = ns.sim_run()
 
-# execute the simulation 
-stats = ns.sim_run()
+    print("End of simulation")
+    print("Nodes generated keys")
+    sim_stat = {}
+    for node_prot in node_protocol_objects:
+        print(str(node_prot.node.name) + "'s keys:\t" + str(node_prot.keys))
+        #print(str(node_prot.node.name) + "'s time stats:\t" + str(node_prot.time_stats))
+        sim_stat[str(node_prot.node.name)+ "'s keys"] = node_prot.time_stats
+    cumulative_stat[i] = sim_stat
+    ns.sim_reset()
 
-print("End of simulation")
-print("Nodes generated keys")
-for node_prot in node_protocol_objects:
-    print(str(node_prot.node.name) + "'s keys:\t" + str(node_prot.keys))
+with open("simulation_results_db.json", "w") as r:
+    json.dump(cumulative_stat, r, indent = 4)
+    
 print("EOF")

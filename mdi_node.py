@@ -15,7 +15,7 @@ class mdiProtocol(NodeProtocol):
         # self.portNameC1=port_names[1] # classic public channel for Alice
         # self.portNameQ2=port_names[2] # quantum right arm for Bob
         # self.portNameC2=port_names[3] # classic public channel for Bob
-        self.client_nodes = client_nodes # client dictionary {num_id: name}
+        self.client_nodes = client_nodes # client nodes list
         self.num_nodes = len(self.client_nodes)
         self.portNamesQ = quantum_port_names
         self.portNamesC = classic_port_names

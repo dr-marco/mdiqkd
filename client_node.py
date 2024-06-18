@@ -32,6 +32,7 @@ class clientProtocol(NodeProtocol):
         self.delta_delay = delta_delay
         self.max_delay_for_protocol_wait = max_delay_for_protocol_wait
         self.other_nodes = other_nodes
+        self.time_stats = {} # protocol time per execution used for stats
 
 
     def run(self):
@@ -145,8 +146,14 @@ class clientProtocol(NodeProtocol):
                         print(self.node.name + " generated key successfully: \t" + self.keys[performing_with])
                     else:
                         print("[!] MDI-QKD protocol failed. The two validation key arrays are not equal")
+                        self.keys[performing_with] = "different key"
                 else:
                     print(self.node.name + " generated key is too short for validation: :\t" + "".join([str(j) for j in temp_key]))
+                    self.keys[performing_with] = "short key"
+
+                # saving stats
+                time_finish = ns.sim_time()
+                self.time_stats[performing_with] = [time_start, time_finish, self.keys[performing_with]]
 
                 # --------------------------- Flags reset ---------------------------
                 #print(self.node.name + " keys: " + str(self.keys))
