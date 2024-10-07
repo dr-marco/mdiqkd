@@ -9,14 +9,22 @@ import client_node
 from switch import ClassicSwitch
 import net_utils as nu
 import json
+from exgaussian_fiber_delay_model import ExGaussianFibreDelayModel
+
+# Config flag for reaction delay model
+mu = 5             # Media per la parte gaussiana
+sigma = 0.05         # Deviazione standard per la parte gaussiana
+lambd = 1.5          # Parametro lambda per la parte esponenziale
 
 # Config flag
 fibreLen = 40 # length of the fiber channel
 quantumLen = 40 # length of the quantum channel. This is used for both Alice and Bob
-num_bits_sim = 1000 # number of qubits prepared during a qkd protocol execution
+num_bits_sim = 10000 # number of qubits prepared during a qkd protocol execution
 delay_wait = 800000
 cSpeed=2*10**5 # speed of light of fiber channel
+#error_models = {"delay_model": ExGaussianFibreDelayModel(c=cSpeed, mu=mu, sigma=sigma, lambd=lambd), 'quantum_loss_model':FibreLossModel(p_loss_init=0, p_loss_length=0.2)}
 error_models = {"delay_model": FibreDelayModel(c=cSpeed), 'quantum_loss_model':FibreLossModel(p_loss_init=0, p_loss_length=0.2)}
+
 
 # Load nodes from json file
 with open("client_nodes_db.json", "r") as f:
@@ -89,19 +97,17 @@ mdi_protocol = mdi.mdiProtocol(mdi_node, client_nodes=client_nodes,
 
 mdi_protocol.start()
 cumulative_stat = {}
-for i in range(10):
-    # execute the simulation 
-    stats = ns.sim_run()
-
-    print("End of simulation")
-    print("Nodes generated keys")
-    sim_stat = {}
-    for node_prot in node_protocol_objects:
-        print(str(node_prot.node.name) + "'s keys:\t" + str(node_prot.keys))
-        #print(str(node_prot.node.name) + "'s time stats:\t" + str(node_prot.time_stats))
-        sim_stat[str(node_prot.node.name)+ "'s keys"] = node_prot.time_stats
-    cumulative_stat[i] = sim_stat
-    ns.sim_reset()
+# execute the simulation 
+stats = ns.sim_run()
+print("End of simulation")
+print("Nodes generated keys")
+sim_stat = {}
+for node_prot in node_protocol_objects:
+    print(str(node_prot.node.name) + "'s keys:\t" + str(node_prot.keys))
+    #print(str(node_prot.node.name) + "'s time stats:\t" + str(node_prot.time_stats))
+    sim_stat[str(node_prot.node.name)+ "'s keys"] = node_prot.time_stats
+cumulative_stat[0] = sim_stat
+ns.sim_reset()
 
 with open("simulation_results_db.json", "w") as r:
     json.dump(cumulative_stat, r, indent = 4)
