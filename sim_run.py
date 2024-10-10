@@ -9,25 +9,74 @@ import client_node
 from switch import ClassicSwitch
 import net_utils as nu
 import json
+import argparse
+import pathlib
+import os
 from exgaussian_fiber_delay_model import ExGaussianFibreDelayModel
 
+# Argparse lib functionality
+parser = argparse.ArgumentParser(prog='sim_run.py',
+                                description=
+                                'A quantum network simulation processing the measurement device independent quantum key distribution.')
+parser.add_argument('-i', '--inputdb', type=pathlib.Path,
+                    help='input database with the network configuration')
+
+parser.add_argument('-o', '--outputdb', type=pathlib.Path,
+                    help='output database with results of the simulation')
+
+parser.add_argument('-dm', '--delaymodel', choices=['fiber', 'exgaussian'], default='fiber',
+                    help='delay model for trasmission through fiber channel')
+
+parser.add_argument('-fl', '--fiberlen', type=float, default=40,
+                    help='length in kilometers of the fiber cables for classical communications')
+
+parser.add_argument('-ql', '--quantumlen', type=float, default=40,
+                    help='length in kilometers of the fiber cables for quantum communications')
+
+parser.add_argument('-nb', '--nbits', type=int, default=1000,
+                    help='number of qubits prepared during a qkd protocol execution')
+
+parser.add_argument('-mu', '--mu', type=float, default=10,
+                    help='mean of gaussian part for reaction delay model')
+
+parser.add_argument('-sg', '--sigma', type=float, default=0.1,
+                    help='standard deviation of gaussian part for reaction delay model')
+
+parser.add_argument('-lb', '--lambd', type=float, default=1.5,
+                    help='lambda decay of exponential part for reaction delay model')
+args = parser.parse_args()
+
+print(args.inputdb)
+
+# Input-Output-Config files names
+if args.inputdb != None:
+    client_nodes_db = args.inputdb
+else:
+    client_nodes_db = "client_nodes_db.json"
+if args.outputdb != None:
+    simulation_results_db = args.outputdb
+else:
+    simulation_results_db = "simulation_results_db.json"
+
 # Config flag for reaction delay model
-mu = 5             # Media per la parte gaussiana
-sigma = 0.05         # Deviazione standard per la parte gaussiana
-lambd = 1.5          # Parametro lambda per la parte esponenziale
+mu = args.mu                # (default 10) Mean of gaussian part
+sigma = args.sigma          # (defualut 0.1) Standard deviation of gaussian part
+lambd = args.lambd          # (default 1.5) lambda decay of exponential part
 
 # Config flag
-fibreLen = 40 # length of the fiber channel
-quantumLen = 40 # length of the quantum channel. This is used for both Alice and Bob
-num_bits_sim = 10000 # number of qubits prepared during a qkd protocol execution
+fibreLen = args.fiberlen            # (default 40) length of the fiber channel
+quantumLen = args.quantumlen        # (default 40) length of the quantum channel. This is used for both Alice and Bob
+num_bits_sim = args.nbits           # (default 1000) number of qubits prepared during a qkd protocol execution
 delay_wait = 800000
-cSpeed=2*10**5 # speed of light of fiber channel
-#error_models = {"delay_model": ExGaussianFibreDelayModel(c=cSpeed, mu=mu, sigma=sigma, lambd=lambd), 'quantum_loss_model':FibreLossModel(p_loss_init=0, p_loss_length=0.2)}
-error_models = {"delay_model": FibreDelayModel(c=cSpeed), 'quantum_loss_model':FibreLossModel(p_loss_init=0, p_loss_length=0.2)}
+cSpeed=2*10**5                      # speed of light of fiber channel
+if args.delaymodel == 'fiber':
+    error_models = {"delay_model": FibreDelayModel(c=cSpeed), 'quantum_loss_model':FibreLossModel(p_loss_init=0, p_loss_length=0.2)}
+elif args.delaymodel == 'exgaussian':
+    error_models = {"delay_model": ExGaussianFibreDelayModel(c=cSpeed, mu=mu, sigma=sigma, lambd=lambd), 'quantum_loss_model':FibreLossModel(p_loss_init=0, p_loss_length=0.2)}
 
 
 # Load nodes from json file
-with open("client_nodes_db.json", "r") as f:
+with open(client_nodes_db, "r") as f:
     data = json.load(f)
 
 client_nodes=[]
@@ -109,7 +158,7 @@ for node_prot in node_protocol_objects:
 cumulative_stat[0] = sim_stat
 ns.sim_reset()
 
-with open("simulation_results_db.json", "w") as r:
+with open(simulation_results_db, "w") as r:
     json.dump(cumulative_stat, r, indent = 4)
     
 print("EOF")
