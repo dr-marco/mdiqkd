@@ -46,8 +46,6 @@ parser.add_argument('-lb', '--lambd', type=float, default=1.5,
                     help='lambda decay of exponential part for reaction delay model')
 args = parser.parse_args()
 
-print(args.inputdb)
-
 # Input-Output-Config files names
 if args.inputdb != None:
     client_nodes_db = args.inputdb
