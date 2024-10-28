@@ -8,7 +8,7 @@ from netsquid.qubits.qubitapi import *
 
 class clientProtocol(NodeProtocol):
 
-    ver_ratio = 0.25 #ratio to split the key generated in the actual key and in the verification key for the validation phase
+    ver_ratio = 0.25    #ratio to split the key generated in the actual key and in the verification key for the validation phase
 
     def __init__(self, node, num_bits=64, init=False,
                     delay_for_wait = 250000, delay_for_first = 1000000, delta_delay = 500, max_delay_for_protocol_wait=100000000,
@@ -16,23 +16,23 @@ class clientProtocol(NodeProtocol):
         super().__init__(node)
         self.num_bits=num_bits
         self.node = node
-        self.portNameQ1=port_names[0] #classical quantum communication channel to mdi node
-        self.portNameC1=port_names[1] #receive port from mdi
-        self.portNameC2=port_names[2] #to another classical node - output port
-        self.portNameC3=port_names[3] #from another classical node - input port
-        self.HbasisList=c_utils.random_basis_gen(self.num_bits) # array of basis randomly chosen
-        self.XbasisList=c_utils.random_basis_gen(self.num_bits) # array of bits randomly chosen
-        self.loc_measRes=[None] * self.num_bits # array for storing the mdi result
-        self.key=[] # empty key
-        self.keys={} # saved keys after performing QKD with other nodes
-        self.init=init #flag in order to say if the node is the initializer or not
-        self.late_init = False #flag used if an init node receive a start message before sending his first. Simply standby the protocol for this init node
+        self.portNameQ1=port_names[0]   #classical quantum communication channel to mdi node
+        self.portNameC1=port_names[1]   #receive port from mdi
+        self.portNameC2=port_names[2]   #to another classical node - output port
+        self.portNameC3=port_names[3]   #from another classical node - input port
+        self.HbasisList=c_utils.random_basis_gen(self.num_bits)     # array of basis randomly chosen
+        self.XbasisList=c_utils.random_basis_gen(self.num_bits)     # array of bits randomly chosen
+        self.loc_measRes=[None] * self.num_bits     # array for storing the mdi result
+        self.key=[]     # empty key
+        self.keys={}    # saved keys after performing QKD with other nodes
+        self.init=init  #flag in order to say if the node is the initializer or not
+        self.late_init = False  #flag used if an init node receive a start message before sending his first. Simply standby the protocol for this init node
         self.delay_for_first = delay_for_first
         self.delay_for_wait = delay_for_wait
         self.delta_delay = delta_delay
         self.max_delay_for_protocol_wait = max_delay_for_protocol_wait
         self.other_nodes = other_nodes
-        self.time_stats = {} # protocol time per execution used for stats
+        self.time_stats = {}    # protocol time per execution used for stats
 
 
     def run(self):
@@ -51,7 +51,12 @@ class clientProtocol(NodeProtocol):
             self.loc_measRes=[None] * self.num_bits
             if self.init:
                 #start the protocol sending the first message to the other node
-                expr = (self.await_timer(c_utils.random_start_time(start=ns.sim_time()))) | (self.await_port_input(input_port))
+                try:
+                    expr = (self.await_timer(c_utils.random_start_time(start=ns.sim_time()))) | (self.await_port_input(input_port))
+                except:
+                    print("#ERROR - client_node line 57")
+                    print(ns.sim_time())
+                    exit()
                 # edge case two init nodes. Yield should listen also the input port for others init messages even if the node is in init=True
                 start = yield (expr)
                 time_start = ns.sim_time()
@@ -59,7 +64,13 @@ class clientProtocol(NodeProtocol):
                     self.init = False
                     self.late_init = True
                     time_start_message = input_port.rx_input()
-                    time_start, = time_start_message.items
+                    try:
+                        print(time_start_message) #TODO remove this
+                        time_start, = time_start_message.items
+                    except:
+                        print("#ERROR - client_node line 67")
+                        print(time_start_message)
+                        exit()
                     performing_with = time_start_message.meta["sender"]
                     protocol_running = True
                 else:
@@ -119,13 +130,17 @@ class clientProtocol(NodeProtocol):
 
                 # compare the basis and generate the correct key, if necessary do flip bit in bob's case
                 temp_key = []
-                for i in range(self.num_bits):
-                    if self.HbasisList[i] == other_client_basis[i]:
-                        if self.loc_measRes[i] != None:
-                            i_result = c_utils.measurement_result_eval(self.init, self.HbasisList[i], self.XbasisList[i], self.loc_measRes[i])
-                            if i_result != None:
-                                temp_key.append(i_result)
-
+                try:
+                    for i in range(self.num_bits):
+                        if self.HbasisList[i] == other_client_basis[i]:
+                            if self.loc_measRes[i] != None:
+                                i_result = c_utils.measurement_result_eval(self.init, self.HbasisList[i], self.XbasisList[i], self.loc_measRes[i])
+                                if i_result != None:
+                                    temp_key.append(i_result)
+                except:
+                    print("#ERROR - client_node line 134")
+                    print(i)
+                    exit()
                 # --------------------------- Validation phase ---------------------------
 
                 # publish portion of the key and wait other part's key

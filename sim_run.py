@@ -50,11 +50,11 @@ args = parser.parse_args()
 if args.inputdb != None:
     client_nodes_db = args.inputdb
 else:
-    client_nodes_db = "client_nodes_db.json"
+    client_nodes_db = "client_nodes_db.json" # default value
 if args.outputdb != None:
     simulation_results_db = args.outputdb
 else:
-    simulation_results_db = "simulation_results_db.json"
+    simulation_results_db = "simulation_results_db.json" # default value
 
 # Config flag for reaction delay model
 mu = args.mu                # (default 10) Mean of gaussian part
