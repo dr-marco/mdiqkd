@@ -27,6 +27,7 @@ class clientProtocol(NodeProtocol):
         self.keys={}    # saved keys after performing QKD with other nodes
         self.init=init  #flag in order to say if the node is the initializer or not
         self.late_init = False  #flag used if an init node receive a start message before sending his first. Simply standby the protocol for this init node
+        self.aborted = False    #flag used if the node receive an abort message during the protocol. Reset the setup for a new try
         self.delay_for_first = delay_for_first
         self.delay_for_wait = delay_for_wait
         self.delta_delay = delta_delay
@@ -52,9 +53,10 @@ class clientProtocol(NodeProtocol):
             if self.init:
                 #start the protocol sending the first message to the other node
                 try:
+                    # waiting the randomly chosen instant before send init message. If any message arrives from others meanwhile it would be a late init
                     expr = (self.await_timer(c_utils.random_start_time(start=ns.sim_time()))) | (self.await_port_input(input_port))
                 except:
-                    print("#ERROR - client_node line 57")
+                    print("#ERROR " + self.node.name + " - client_node line 55")
                     print(ns.sim_time())
                     exit()
                 # edge case two init nodes. Yield should listen also the input port for others init messages even if the node is in init=True
@@ -65,14 +67,18 @@ class clientProtocol(NodeProtocol):
                     self.late_init = True
                     time_start_message = input_port.rx_input()
                     try:
-                        print(time_start_message) #TODO remove this
-                        time_start, = time_start_message.items
+                        if time_start_message.meta["header"] == "START":
+                            time_start, = time_start_message.items
+                            performing_with = time_start_message.meta["sender"]
+                            protocol_running = True
+                        else:
+                            print("[!] Abort from " + self.node.name + " to " + time_start_message.meta["sender"])
+                            output_port.tx_output(msg("ABORT", sender=self.node.name, destination=time_start_message.meta["sender"], header="ABORT"))
                     except:
-                        print("#ERROR - client_node line 67")
-                        print(time_start_message)
+                        print("#ERROR " + self.node.name + " - client_node line 69")
+                        print(time_start_message.meta["header"])
+                        print(time_start_message.meta["sender"])
                         exit()
-                    performing_with = time_start_message.meta["sender"]
-                    protocol_running = True
                 else:
                     quantum_port.tx_output((msg(time_start, sender=self.node.name, destination=self.other_nodes[0]), create_qubits(1, no_state= True)[0]))
                     ack_status = yield (self.await_port_input(result_port)) | (self.await_timer(self.max_delay_for_protocol_wait))
@@ -80,7 +86,7 @@ class clientProtocol(NodeProtocol):
                         ack_message, = result_port.rx_input().items
                         if ack_message == "ACK":
                             performing_with = self.other_nodes[0]
-                            output_port.tx_output(msg(time_start, sender=self.node.name, destination=performing_with))
+                            output_port.tx_output(msg(time_start, sender=self.node.name, destination=performing_with, header="START"))
                             protocol_running = True
                         else:
                             print("[!] "+ self.node.name +" Initialization error: mdi didn't acknowledge the init protocol. Reset and retry")
@@ -119,56 +125,68 @@ class clientProtocol(NodeProtocol):
                 # --------------------------- Results evaluation ---------------------------
 
                 # publish basis chosen and wait other part's basis
-                output_port.tx_output(msg(self.HbasisList, sender=self.node.name, destination=performing_with))
+                output_port.tx_output(msg(self.HbasisList, sender=self.node.name, destination=performing_with, header="BASIS"))
                 yield self.await_port_input(input_port)
-                other_client_basis = input_port.rx_input().items # TODO manage other init message at this time
-                # # !!! Very bad snippet of code TODO delete this garbage
-                # while not (other_client_basis_message.meta["sender"] == performing_with):
-                #     other_client_basis_message = input_port.rx_input()
-                #     print(other_client_basis_message)
-                # other_client_basis = other_client_basis_message.items
+                other_client_basis_message = input_port.rx_input()
+                if other_client_basis_message.meta["header"] == "BASIS":
+                    other_client_basis = other_client_basis_message.items 
+                elif other_client_basis_message.meta["header"] == "ABORT":
+                    print("[!] ABORT for " + self.node.name)
+                    self.aborted = True
+                    if self.init:
+                        self.init = False
+                        self.late_init = True
+                # else:
+                #     print("[!] Protocol error for " + self.node.name)
+                #     print("Header last message from " + str(other_client_basis_message.meta["sender"]) +": " + str(other_client_basis_message.meta["header"]))
+                #     self.aborted = True
+                #     if self.init:
+                #         self.init = False
+                #         self.late_init = True
 
-                # compare the basis and generate the correct key, if necessary do flip bit in bob's case
-                temp_key = []
-                try:
-                    for i in range(self.num_bits):
-                        if self.HbasisList[i] == other_client_basis[i]:
-                            if self.loc_measRes[i] != None:
-                                i_result = c_utils.measurement_result_eval(self.init, self.HbasisList[i], self.XbasisList[i], self.loc_measRes[i])
-                                if i_result != None:
-                                    temp_key.append(i_result)
-                except:
-                    print("#ERROR - client_node line 134")
-                    print(i)
-                    exit()
+                if not self.aborted:
+                    # compare the basis and generate the correct key, if necessary do flip bit in bob's case
+                    temp_key = []
+                    try:
+                        for i in range(self.num_bits):
+                            if self.HbasisList[i] == other_client_basis[i]:
+                                if self.loc_measRes[i] != None:
+                                    i_result = c_utils.measurement_result_eval(self.init, self.HbasisList[i], self.XbasisList[i], self.loc_measRes[i])
+                                    if i_result != None:
+                                        temp_key.append(i_result)
+                    except:
+                        print("#ERROR client " + self.node.name + " - client_node line 149")
+                        print(i)
+                        exit()
                 # --------------------------- Validation phase ---------------------------
 
-                # publish portion of the key and wait other part's key
-                if len(temp_key) >= (1/clientProtocol.ver_ratio):
-                    # splitting the temp_key in:
-                    #   verification_key used for the validation phase
-                    verification_key = temp_key[:int(len(temp_key)*clientProtocol.ver_ratio)]
-                    #   generated_key saved if the validation is successfull
-                    generated_key = temp_key[int(len(temp_key)*clientProtocol.ver_ratio):]
-                    output_port.tx_output(msg(verification_key, sender=self.node.name, destination=performing_with))
-                    yield self.await_port_input(input_port)
-                    message = input_port.rx_input()
-                    other_client_ver_key = message.items #.meta["sender"]
+                if not self.aborted:
+                    # publish portion of the key and wait other part's key
+                    if len(temp_key) >= (1/clientProtocol.ver_ratio):
+                        # splitting the temp_key in:
+                        #   verification_key used for the validation phase
+                        verification_key = temp_key[:int(len(temp_key)*clientProtocol.ver_ratio)]
+                        #   generated_key saved if the validation is successfull
+                        generated_key = temp_key[int(len(temp_key)*clientProtocol.ver_ratio):]
+                        output_port.tx_output(msg(verification_key, sender=self.node.name, destination=performing_with))
+                        yield self.await_port_input(input_port)
+                        message = input_port.rx_input()
+                        other_client_ver_key = message.items #.meta["sender"]
 
-                    if verification_key == other_client_ver_key:
-                        self.key = generated_key
-                        self.keys[performing_with] = "".join([str(j) for j in self.key])
-                        print(self.node.name + " generated key successfully: \t" + self.keys[performing_with])
+                        if verification_key == other_client_ver_key:
+                            self.key = generated_key
+                            self.keys[performing_with] = "".join([str(j) for j in self.key])
+                            print(self.node.name + " generated key successfully: \t" + self.keys[performing_with])
+                        else:
+                            print("[!] MDI-QKD protocol failed. The two validation key arrays are not equal")
+                            self.keys[performing_with] = "different key"
                     else:
-                        print("[!] MDI-QKD protocol failed. The two validation key arrays are not equal")
-                        self.keys[performing_with] = "different key"
-                else:
-                    print(self.node.name + " generated key is too short for validation: :\t" + "".join([str(j) for j in temp_key]))
-                    self.keys[performing_with] = "short key"
+                        print(self.node.name + " generated key is too short for validation: :\t" + "".join([str(j) for j in temp_key]))
+                        self.keys[performing_with] = "short key"
 
-                # saving stats
-                time_finish = ns.sim_time()
-                self.time_stats[performing_with] = [time_start, time_finish, self.keys[performing_with]]
+                    # saving stats
+                    time_finish = ns.sim_time()
+                    self.time_stats[performing_with] = [time_start, time_finish, self.keys[performing_with]]
 
                 # --------------------------- Flags reset ---------------------------
                 #print(self.node.name + " keys: " + str(self.keys))
@@ -180,6 +198,7 @@ class clientProtocol(NodeProtocol):
                 if self.late_init:
                     self.late_init = False
                     self.init = True
+                self.aborted = False
                 protocol_running = False
                 performing_with = None
             else:
