@@ -2,7 +2,8 @@
 
 Simulation of the protocol Measurement-Device-Independent Quantum Key Distribution using NetSquid
 
-__Alert__: ATM the updates are not finished and results could be wrong
+> [!ALERT] 
+> ATM the updates are not finished and results could be wrong
 
 ### Update 2023-08-27 
 
@@ -26,7 +27,7 @@ The simulation should work quite fine but it is not obvious that everything work
 
 The current network consists of four client nodes: Alice, Bob, Charlie and Dave. It is described in the json file ```client_nodes_db.json```
 
-### Update 2024-10-10
+### Update 2024-10-10 (edit 2024-11-07)
 
 Still alive. Added the new model that create the delay considering the length of the fiber cable and the reaction time of the photon source. The reaction time model
 follows an [ex-gaussian distribution](https://en.wikipedia.org/wiki/Exponentially_modified_Gaussian_distribution). 
@@ -36,7 +37,7 @@ Next steps:
 
 - Optional refactor (may not happen but never say never)
 - Add wrapper for multiple simulations
-- Solve bug with some possible race conditions during runs
+- ~~Solve bug with some possible race conditions during runs~~ edit: bug solved by abort system implementation 
 
 ### Usage
 
