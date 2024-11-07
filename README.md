@@ -2,7 +2,7 @@
 
 Simulation of the protocol Measurement-Device-Independent Quantum Key Distribution using NetSquid
 
-> [!ALERT] 
+> [!WARNING] 
 > ATM the updates are not finished and results could be wrong
 
 ### Update 2023-08-27 
@@ -45,5 +45,5 @@ You can work with the __json__ file, where you can modify the network, and the `
 
 ```python sim_run.py```
 
-> [!WARNING] 
+> [!NOTE] 
 > Netsquid library required and tested only with Python 3.9
