@@ -110,7 +110,14 @@ class clientProtocol(NodeProtocol):
                 for i in range(self.num_bits):
                     # prepare the qubit photon
                     qubit=c_utils.generate_quantum_photon(self.XbasisList[i], self.HbasisList[i])
-                    yield self.await_timer(end_time=time_first_qubit+i*delay_for_wait)
+                    try:
+                        yield self.await_timer(end_time=time_first_qubit+i*delay_for_wait) 
+                    except:
+                        print("#ERROR " + self.node.name + " - client_node line 113")
+                        print("photon number: \t\t" + str(i))
+                        print("wait to send until: \t" + str(time_first_qubit+i*delay_for_wait))
+                        print("current time: \t\t" + str(ns.sim_time()))
+                        exit()
                     print(self.node.name + " time: " + str(time_first_qubit+i*delay_for_wait))
                     # send the qubit to the mdi_node
                     quantum_port.tx_output({None,qubit}) #message format for CombinedChannel -> {classical, quantum}

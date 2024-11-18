@@ -36,6 +36,9 @@ parser.add_argument('-ql', '--quantumlen', type=float, default=40,
 parser.add_argument('-nb', '--nbits', type=int, default=1000,
                     help='number of qubits prepared during a qkd protocol execution')
 
+parser.add_argument('-nr', '--nrun', type=int, default=0,
+                    help='number of current simulation iteration. Useful to save correctly in one json output file')
+
 parser.add_argument('-mu', '--mu', type=float, default=10,
                     help='mean of gaussian part for reaction delay model')
 
@@ -65,7 +68,7 @@ lambd = args.lambd          # (default 1.5) lambda decay of exponential part
 fibreLen = args.fiberlen            # (default 40) length of the fiber channel
 quantumLen = args.quantumlen        # (default 40) length of the quantum channel. This is used for both Alice and Bob
 num_bits_sim = args.nbits           # (default 1000) number of qubits prepared during a qkd protocol execution
-delay_wait = 800000
+delay_wait = 1e4 * fibreLen
 cSpeed=2*10**5                      # speed of light of fiber channel
 if args.delaymodel == 'fiber':
     error_models = {"delay_model": FibreDelayModel(c=cSpeed), 'quantum_loss_model':FibreLossModel(p_loss_init=0, p_loss_length=0.2)}
@@ -134,7 +137,7 @@ for client in client_nodes:
 
     node_.connect_to(mdi_node, CQChannel_node, local_port_name="portCQ", remote_port_name=mdi_ports[client][1])
     node_objects.append(node_)
-    node_protocol = client_node.clientProtocol(node_, num_bits=num_bits_sim, delay_for_wait = delay_wait, init=init[client], other_nodes=other_nodes[client])
+    node_protocol = client_node.clientProtocol(node_, num_bits=num_bits_sim, delay_for_wait = delay_wait, delay_for_first=2e4 * fibreLen, init=init[client], other_nodes=other_nodes[client])
     node_protocol.start()
     node_protocol_objects.append(node_protocol)
 
@@ -153,7 +156,12 @@ for node_prot in node_protocol_objects:
     print(str(node_prot.node.name) + "'s keys:\t" + str(node_prot.keys))
     #print(str(node_prot.node.name) + "'s time stats:\t" + str(node_prot.time_stats))
     sim_stat[str(node_prot.node.name)+ "'s keys"] = node_prot.time_stats
-cumulative_stat[0] = sim_stat
+
+if os.path.isfile(simulation_results_db):
+    with open(simulation_results_db, "r") as f:
+        cumulative_stat = json.load(f)
+nrun = args.nrun
+cumulative_stat[nrun] = sim_stat
 ns.sim_reset()
 
 with open(simulation_results_db, "w") as r:
