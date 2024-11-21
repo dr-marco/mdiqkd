@@ -1,6 +1,6 @@
 import netsquid as ns
 from netsquid.protocols import NodeProtocol
-import mdi_utils
+import mdi.mdi_utils as mdi_utils
 
 # MDI node for mdi architecture
 

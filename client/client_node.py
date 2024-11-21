@@ -1,7 +1,7 @@
 import netsquid as ns
 from netsquid.protocols import NodeProtocol
 from netsquid.components.component import Message as msg
-import client_utils as c_utils
+import client.client_utils as c_utils
 from netsquid.qubits.qubitapi import *
 
 # new version of the client node, should work with sim_run.py

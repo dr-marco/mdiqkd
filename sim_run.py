@@ -4,15 +4,15 @@ from netsquid.components.cchannel import ClassicalChannel
 from netsquid.components.models import  FibreDelayModel
 from netsquid.components.cqchannel import CombinedChannel
 from netsquid.components.models.qerrormodels import FibreLossModel
-import mdi_node as mdi
-import client_node
-from switch import ClassicSwitch
-import net_utils as nu
+import mdi.mdi_node as mdi
+import client.client_node as client_node
+from network.switch import ClassicSwitch
+import network.net_utils as nu
 import json
 import argparse
 import pathlib
 import os
-from exgaussian_fiber_delay_model import ExGaussianFibreDelayModel
+from models.exgaussian_fiber_delay_model import ExGaussianFibreDelayModel as ExGaussianFibreDelayModel
 
 # Argparse lib functionality
 parser = argparse.ArgumentParser(prog='sim_run.py',
