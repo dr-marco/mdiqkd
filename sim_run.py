@@ -3,7 +3,7 @@ from netsquid.nodes.node import Node
 from netsquid.components.cchannel import ClassicalChannel
 from netsquid.components.models import  FibreDelayModel
 from netsquid.components.cqchannel import CombinedChannel
-from netsquid.components.models.qerrormodels import FibreLossModel
+from netsquid.components.models.qerrormodels import FibreLossModel, DephaseNoiseModel #TODO add dephase error in simulations
 import mdi.mdi_node as mdi
 import client.client_node as client_node
 from network.switch import ClassicSwitch

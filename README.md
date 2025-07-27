@@ -15,6 +15,8 @@ You can set some parameters into the python command. For more information about 
 
 ```python sim_run.py -h```
 
+The network description is described into the json file ```client_nodes_db.json```. Each element is a node and contains a ```init``` flag and a list of ```other_nodes``` to run the protocol against. The current json file can be used as example of a valid network.
+
 > [!NOTE] 
 > Netsquid library required and tested only with Python 3.9
 
